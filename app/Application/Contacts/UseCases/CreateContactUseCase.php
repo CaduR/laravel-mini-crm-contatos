@@ -17,11 +17,7 @@ class CreateContactUseCase
     }
 
     public function execute(array $data): Contact
-    {   //cria o contato no banco
-        $contact = $this->repository->create($data);
-        //enfileira o job para rodar em segundo plano
-        ProcessContactScoreJob::dispatch($contact);
-
-        return $contact;
+    {
+        return $this->repository->create($data);
     }
 }
