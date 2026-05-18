@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Contacts\ValueObjects;
+namespace Tests\Unit\Domain\ValueObjects;
 
 use App\Domain\Contacts\ValueObjects\Email;
 use InvalidArgumentException;
