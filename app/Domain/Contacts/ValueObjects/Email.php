@@ -4,13 +4,13 @@ namespace App\Domain\Contacts\ValueObjects;
 
 use InvalidArgumentException;
 
-class Email 
+class Email
 {
     private string $value;
 
-    public function __construct(string $value) 
+    public function __construct(string $value)
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidArgumentException('O E-mail informado é invalido');
         }
 
@@ -22,4 +22,3 @@ class Email
         return $this->value;
     }
 }
-

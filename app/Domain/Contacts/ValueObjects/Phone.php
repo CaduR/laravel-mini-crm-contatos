@@ -25,7 +25,7 @@ class Phone
         return $this->value;
     }
 
-    public function __tostring(): string
+    public function __toString(): string
     {
         return $this->value;
     }

@@ -2,15 +2,13 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreContactRequest extends FormRequest
 {
-
     public function authorize(): bool
     {
-        return true; //permitir requisição
+        return true; // permitir requisição
     }
 
     public function rules(): array

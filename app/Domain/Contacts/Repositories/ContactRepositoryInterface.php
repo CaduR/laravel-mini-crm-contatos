@@ -8,4 +8,3 @@ interface ContactRepositoryInterface
 {
     public function create(array $data): Contact;
 }
-

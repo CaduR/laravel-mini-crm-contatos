@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Application\Contacts\UseCases;
 
-use Tests\TestCase;
-use Mockery;
-use App\Models\Contact;
-use App\Domain\Contacts\Repositories\ContactRepositoryInterface;
 use App\Application\Contacts\UseCases\CreateContactUseCase;
+use App\Domain\Contacts\Repositories\ContactRepositoryInterface;
+use App\Models\Contact;
+use Mockery;
+use Tests\TestCase;
 
 class CreateContactUseCaseTest extends TestCase
 {

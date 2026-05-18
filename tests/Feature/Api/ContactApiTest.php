@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Api;
 
+use App\Jobs\ProcessContactScoreJob;
 use App\Models\Contact;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-use App\Jobs\ProcessContactScoreJob;
 use Tests\TestCase;
 
 class ContactApiTest extends TestCase
@@ -19,7 +19,7 @@ class ContactApiTest extends TestCase
             'name' => 'Fulano Tal',
             'email' => 'fulano@teste.com',
             'phone' => '11999999999',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $response = $this->getJson('/api/contacts');
@@ -27,10 +27,10 @@ class ContactApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'name', 'email', 'phone', 'score', 'status']
+                    '*' => ['id', 'name', 'email', 'phone', 'score', 'status'],
                 ],
                 'links',
-                'meta'
+                'meta',
             ]);
     }
 
@@ -39,7 +39,7 @@ class ContactApiTest extends TestCase
         $payload = [
             'name' => 'Beltrano Silva',
             'email' => 'beltrano@teste.com',
-            'phone' => '(11) 98888-8888' // com formatação
+            'phone' => '(11) 98888-8888', // com formatação
         ];
 
         $response = $this->postJson('/api/contacts', $payload);
@@ -50,7 +50,7 @@ class ContactApiTest extends TestCase
         // Garante que o observer normalizou o telefone antes de salvar
         $this->assertDatabaseHas('contacts', [
             'email' => 'beltrano@teste.com',
-            'phone' => '11988888888' // Sem formatação
+            'phone' => '11988888888', // Sem formatação
         ]);
     }
 
@@ -59,7 +59,7 @@ class ContactApiTest extends TestCase
         $payload = [
             'name' => 'Beltrano da Silva',
             'email' => 'email-invalido',
-            'phone' => '11988888888'
+            'phone' => '11988888888',
         ];
 
         $response = $this->postJson('/api/contacts', $payload);
@@ -74,7 +74,7 @@ class ContactApiTest extends TestCase
             'name' => 'Ciclano Souza',
             'email' => 'ciclano@teste.com',
             'phone' => '11977777777',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $response = $this->getJson("/api/contacts/{$contact->id}");
@@ -90,12 +90,12 @@ class ContactApiTest extends TestCase
             'name' => 'Ciclano Original',
             'email' => 'original@teste.com',
             'phone' => '11977777777',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $payload = [
             'name' => 'Ciclano Editado',
-            'email' => 'editado@teste.com'
+            'email' => 'editado@teste.com',
         ];
 
         $response = $this->putJson("/api/contacts/{$contact->id}", $payload);
@@ -106,7 +106,7 @@ class ContactApiTest extends TestCase
 
         $this->assertDatabaseHas('contacts', [
             'id' => $contact->id,
-            'name' => 'Ciclano Editado'
+            'name' => 'Ciclano Editado',
         ]);
     }
 
@@ -116,7 +116,7 @@ class ContactApiTest extends TestCase
             'name' => 'Contato Deletavel',
             'email' => 'deletavel@teste.com',
             'phone' => '11977777777',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $response = $this->deleteJson("/api/contacts/{$contact->id}");
@@ -125,7 +125,7 @@ class ContactApiTest extends TestCase
 
         // Garante o uso do Soft Delete (continua no banco, mas com deleted_at preenchido)
         $this->assertSoftDeleted('contacts', [
-            'id' => $contact->id
+            'id' => $contact->id,
         ]);
     }
 
@@ -137,7 +137,7 @@ class ContactApiTest extends TestCase
             'name' => 'Contato Pontuavel',
             'email' => 'pontuavel@teste.com',
             'phone' => '11977777777',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $response = $this->postJson("/api/contacts/{$contact->id}/process-score");

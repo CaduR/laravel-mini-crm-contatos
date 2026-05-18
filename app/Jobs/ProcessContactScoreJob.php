@@ -2,9 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Domain\Contacts\Services\CalculateContactScoreService;
+use App\Events\ContactScoreProcessed;
+use App\Models\Contact;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use App\Models\Contact;
+
 use function Illuminate\Support\now;
 
 class ProcessContactScoreJob implements ShouldQueue
@@ -15,10 +18,10 @@ class ProcessContactScoreJob implements ShouldQueue
 
     public function __construct(Contact $contact)
     {
-        $this->contact = $contact; //ao criar job ele recebe contato
+        $this->contact = $contact; // ao criar job ele recebe contato
     }
 
-    public function handle(\App\Domain\Contacts\Services\CalculateContactScoreService $scoreService): void
+    public function handle(CalculateContactScoreService $scoreService): void
     {
         // 1. Muda status para processando
         $this->contact->status = 'processing';
@@ -36,7 +39,7 @@ class ProcessContactScoreJob implements ShouldQueue
             $this->contact->processed_at = now();
             $this->contact->save();
 
-            \App\Events\ContactScoreProcessed::dispatch($this->contact);
+            ContactScoreProcessed::dispatch($this->contact);
 
         } catch (\Exception $e) {
             $this->contact->status = 'failed';

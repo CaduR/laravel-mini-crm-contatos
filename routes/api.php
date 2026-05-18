@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ContactController;
+use Illuminate\Support\Facades\Route;
 
 // Rota de gatilho score
 Route::post('contacts/{contact}/process-score', [ContactController::class, 'processScore']);
