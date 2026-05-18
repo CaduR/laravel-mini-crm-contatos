@@ -28,9 +28,9 @@ class ContactScoreProcessed implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        //canal público chamado contacts
+        // canal público chamado contacts.{id}
         return [
-            new Channel('contacts'),
+            new Channel('contacts.'.$this->contact->id),
         ];
     }
 }

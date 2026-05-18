@@ -51,18 +51,20 @@
             document.getElementById('ws-status').style.color = "green";
         });
 
-        // Escuta o evento do Back-end
-        window.Echo.channel('contacts')
-            .listen('ContactScoreProcessed', (e) => {
-                const li = document.getElementById('contact-' + e.contact.id);
-                if (li) {
-                    li.innerHTML = renderContact(e.contact);
-                    li.style.backgroundColor = 'lightgreen'; // Destaca quando atualiza
-                    setTimeout(() => li.style.backgroundColor = 'transparent', 1000);
-                } else {
-                    loadContacts();
-                }
-            });
+        // Escuta eventos para um contato especifico
+        function listenToContact(contactId) {
+            window.Echo.channel('contacts.' + contactId)
+                .listen('ContactScoreProcessed', (e) => {
+                    const li = document.getElementById('contact-' + e.contact.id);
+                    if (li) {
+                        li.innerHTML = renderContact(e.contact);
+                        li.style.backgroundColor = 'lightgreen'; // Destaca quando atualiza
+                        setTimeout(() => li.style.backgroundColor = 'transparent', 1000);
+                    } else {
+                        loadContacts();
+                    }
+                });
+        }
 
         // Funções da API
         const contactsList = document.getElementById('contacts-list');
@@ -80,7 +82,7 @@
 
         // Função para Deletar um contato (Chama a rota DELETE da nossa API)
         async function deleteContact(id) {
-            if(confirm('Tem certeza que deseja apagar este contato?')) {
+            if (confirm('Tem certeza que deseja apagar este contato?')) {
                 const res = await fetch(`/api/contacts/${id}`, {
                     method: 'DELETE',
                     headers: { 'Accept': 'application/json' }
@@ -106,6 +108,9 @@
                 li.id = 'contact-' + contact.id;
                 li.innerHTML = renderContact(contact);
                 contactsList.appendChild(li);
+
+
+                listenToContact(contact.id);
             });
         }
 
