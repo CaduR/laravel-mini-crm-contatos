@@ -49,4 +49,13 @@ class ContactController extends Controller
     {
         //
     }
+
+    public function processScore(Contact $contact)
+    {
+        \App\Jobs\ProcessContactScoreJob::dispatch($contact); // Enfileira o job passando o contato
+
+        // Retorna status 202 - informando que a requisição foi aceita
+        return response()->json(['message' => 'Processamento de score iniciado em segundo plano.'], 202);
+    }
+
 }

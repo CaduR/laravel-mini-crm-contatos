@@ -5,6 +5,7 @@ namespace App\Jobs;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Contact;
+use function Illuminate\Support\now;
 
 class ProcessContactScoreJob implements ShouldQueue
 {
@@ -17,8 +18,27 @@ class ProcessContactScoreJob implements ShouldQueue
         $this->contact = $contact; //ao criar job ele recebe contato
     }
 
-    public function handle(): void
+    public function handle(\App\Domain\Contacts\Services\CalculateContactScoreService $scoreService): void
     {
-        //
+        // 1. Muda status para processando
+        $this->contact->status = 'processing';
+        $this->contact->save();
+
+        sleep(1);
+
+        try {
+            // Calcula score usando regra de dominio
+            $score = $scoreService->calculate($this->contact->name, $this->contact->email, $this->contact->phone);
+
+            // Finaliza com sucesso
+            $this->contact->score = $score;
+            $this->contact->status = 'active';
+            $this->contact->processed_at = now();
+            $this->contact->save();
+
+        } catch (\Exception $e) {
+            $this->contact->status = 'failed';
+            $this->contact->save();
+        }
     }
 }
