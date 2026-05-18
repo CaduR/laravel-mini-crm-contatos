@@ -18,6 +18,14 @@ class CreateContactUseCase
 
     public function execute(array $data): Contact
     {
+        // se for inválido estoura um InvalidArgumentException aqui
+        $email = new \App\Domain\Contacts\ValueObjects\Email($data['email']);
+        $phone = new \App\Domain\Contacts\ValueObjects\Phone($data['phone']);
+
+        //passando o valor já validado 
+        $data['email'] = $email->getValue();
+        $data['phone'] = $phone->getValue();
+        // salva no banco
         return $this->repository->create($data);
     }
 }

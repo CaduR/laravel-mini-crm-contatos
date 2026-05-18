@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Contact;
+use App\Observers\ContactObserver;
 use Illuminate\Support\ServiceProvider;
 use App\Domain\Contacts\Repositories\ContactRepositoryInterface;
 use App\Infrastructure\Persistence\Repositories\ContactEloquentRepository;
@@ -12,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->bind (
+        $this->app->bind(
             ContactRepositoryInterface::class,
             ContactEloquentRepository::class
         );
@@ -20,6 +22,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        Contact::observe(ContactObserver::class);
     }
 }
