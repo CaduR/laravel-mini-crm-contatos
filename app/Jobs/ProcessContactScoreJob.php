@@ -36,6 +36,8 @@ class ProcessContactScoreJob implements ShouldQueue
             $this->contact->processed_at = now();
             $this->contact->save();
 
+            \App\Events\ContactScoreProcessed::dispatch($this->contact);
+
         } catch (\Exception $e) {
             $this->contact->status = 'failed';
             $this->contact->save();
