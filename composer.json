@@ -35,12 +35,28 @@
     },
     "scripts": {
         "setup": [
-            "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
             "npm install --ignore-scripts",
             "npm run build"
+        ],
+        "docker:setup": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "docker compose up -d",
+            "docker compose run --rm -e WWWGROUP=1000 -e WWWUSER=1000 laravel.test php artisan key:generate",
+            "docker compose run --rm -e WWWGROUP=1000 -e WWWUSER=1000 laravel.test php artisan migrate --force"
+        ],
+        "docker:up": [
+            "docker compose up -d"
+        ],
+        "docker:down": [
+            "docker compose down"
+        ],
+        "docker:migrate": [
+            "docker compose run --rm -e WWWGROUP=1000 -e WWWUSER=1000 laravel.test php artisan migrate"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
@@ -49,6 +65,9 @@
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
             "@php artisan test"
+        ],
+        "test:docker": [
+            "docker compose run --rm -e WWWGROUP=1000 -e WWWUSER=1000 laravel.test php artisan test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

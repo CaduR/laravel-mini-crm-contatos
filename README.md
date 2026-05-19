@@ -31,69 +31,110 @@ Este projeto foi construído fugindo do padrão clássico (MVC "Fat Controller /
 
 ## Guia de Setup e Execução
 
-O projeto está totalmente dockerizado. Você precisará ter o [Docker](https://docs.docker.com/engine/install/) rodando.
+O projeto está totalmente dockerizado. Para começar a rodar ou testar após clonar o repositório do GitHub, siga o passo a passo abaixo.
 
 ### 1. Preparando as Dependências
-Como o repositório é "limpo", instale as dependências via Composer para baixar o Laravel Sail. Se você tiver PHP local:
+Como o repositório vem limpo do GitHub, você precisa instalar as dependências do Composer.
+
+*   **Se você tiver PHP e Composer locais:**
+    ```bash
+    composer install
+    cp .env.example .env
+    ```
+*   **Se você NÃO tiver PHP local (usando apenas o Docker):**
+    Rode o comando abaixo no terminal para instalar as dependências usando uma imagem docker temporária do Composer:
+    ```bash
+    docker run --rm --interactive --tty -v ${PWD}:/app composer install
+    cp .env.example .env
+    ```
+
+### 2. Inicializando o Ambiente (Setup Completo)
+
+Você pode inicializar o projeto de duas formas, dependendo do seu ambiente local:
+
+#### Opção A: Setup Completo via Docker
+Se você não tem o PHP/SQLite configurados localmente ou quer evitar erros de extensões ausentes (ex: `pdo_sqlite`), use o comando integrado ao Docker:
 ```bash
-composer install
-cp .env.example .env
+composer docker:setup
 ```
-*(Se não possuir PHP local, use um container efêmero para gerar o vendor, veja a [documentação do Laravel](https://laravel.com/docs/11.x/sail#installing-composer-dependencies-for-existing-projects)).*
+*(Esse comando baixa as dependências, cria os arquivos necessários e inicializa os contêineres executando o `key:generate` e `migrate` de forma 100% segura dentro do ambiente Docker virtualizado).*
 
-### 2. Subindo a Infraestrutura
-Levante todos os contêineres necessários (App, Banco de Dados):
+#### Opção B: Setup Local (Requer PHP + Extensões locais)
+Se você possui o PHP e o driver SQLite localmente configurados em sua máquina, pode rodar o setup tradicional:
 ```bash
-./vendor/bin/sail up -d
-
-# Gere a chave da aplicação
-./vendor/bin/sail artisan key:generate
+composer setup
 ```
+*(Esse comando copia o `.env`, cria o banco SQLite local, gera a chave de criptografia, roda as migrações locais e compila o frontend com Vite).*
 
-### 3. Executando as Migrações
-Com o banco rodando, crie a estrutura de tabelas:
-```bash
-./vendor/bin/sail artisan migrate
-```
+### 3. Subindo e Gerenciando a Infraestrutura Docker
+Uma vez que o projeto esteja inicializado, você pode gerenciar os contêineres Docker utilizando os seguintes comandos integrados no Composer:
 
-### 4. Processamento Assíncrono e WebSockets
-O cálculo de *score* foi construído em *background* e empurra a atualização para o frontend via *broadcasting*. Para isso, você precisará de dois processos rodando em paralelo no terminal:
-
-**Terminal A (Worker das Filas):**
-```bash
-./vendor/bin/sail artisan queue:work
-```
-
-**Terminal B (Servidor Reverb - WebSockets):**
-```bash
-./vendor/bin/sail artisan reverb:start
-```
-
-### 5. Acessando a Aplicação
-Abra o navegador em: **[http://localhost](http://localhost)**
-Você verá um SPA simples feito puramente em HTML/JS com Laravel Echo escutando eventos. Adicione um contato e observe a mudança de status e score ocorrer em tempo real (ficará verde)!
+*   **Subir infraestrutura (MySQL, Redis, Laravel Reverb):**
+    ```bash
+    composer docker:up
+    ```
+*   **Derrubar infraestrutura:**
+    ```bash
+    composer docker:down
+    ```
+*   **Rodar migrações dentro do contêiner Docker:**
+    ```bash
+    composer docker:migrate
+    ```
 
 ---
 
 ## Suíte de Testes (TDD)
 
-A aplicação foi criada sob a filosofia TDD (Test-Driven Development).
-Possuímos uma mescla de **Testes de Unidade** (validando Domínio isolado com *mocks*) e **Testes de Integração/Feature** (consumindo toda a API).
+A aplicação foi criada sob a filosofia TDD (Test-Driven Development) e possui testes de unidade e de integração completos.
 
-Para atestar o funcionamento executando a suíte inteira, rode:
+> [!NOTE]  
+> **Lógica de Testes Aprimorada:** O projeto foi configurado com um banco de dados SQLite **in-memory (`:memory:`)** e uma chave `APP_KEY` estática em `phpunit.xml`. Isso significa que a suíte de testes funcionará de forma robusta e isolada imediatamente após a clonagem, sem necessidade de banco físico ou configurações manuais!
+
+Você pode executar os testes de duas formas:
+
+### Opção A: Utilizando Docker (Recomendado e Sem Setup Local)
+A forma mais robusta e independente de plataforma para rodar os testes é executando-os diretamente dentro do contêiner Docker do projeto:
 ```bash
-./vendor/bin/sail artisan test
+composer test:docker
 ```
+*(Esse atalho compila/executa os testes em um ambiente virtualizado isolado, resolvendo quaisquer divergências de sistema operacional, incluindo Windows, macOS e Linux).*
+
+### Opção B: Executando Localmente (Requer PHP + Extensão pdo_sqlite)
+Se você tiver o PHP com o driver SQLite habilitado na sua máquina, basta rodar:
+```bash
+composer test
+```
+ou
+```bash
+php artisan test
+```
+
+---
+
+## Como Visualizar e Acessar o Projeto (CRUD & API)
+
+A aplicação possui um **Web Client (Interface Gráfica)** funcional e reativo (com integração via WebSocket/Laravel Reverb) servido na raiz do projeto, além de uma API completa.
+
+### 1. Interface Web (CRUD no Navegador)
+Acesse a página inicial para interagir com o formulário de contatos e ver as atualizações em tempo real:
+*   **Via Docker (Sail):** `http://localhost`
+*   **Via Servidor Local:** `http://localhost:8000`
+
+### 2. Endpoints da API (URL Base)
+Caso queira integrar com outros serviços ou testar programaticamente, a URL base da API é:
+*   **Via Docker (Sail):** `http://localhost/api/contacts`
+*   **Via Servidor Local:** `http://localhost:8000/api/contacts`
 
 ---
 
 ## Endpoints da API
 
-Caso queira testar a API via Postman/Insomnia, estas são as rotas disponíveis (Todas respondem em JSON):
+Caso queira testar a API via Postman/Insomnia, estas são as rotas disponíveis (todas exigem/retornam cabeçalhos `Accept: application/json`):
 
-*   `POST /api/contacts` - Criação de novo contato
-*   `GET /api/contacts` - Lista paginada
-*   `GET /api/contacts/{id}` - Visualiza um contato específico
-*   `PUT /api/contacts/{id}` - Atualiza um contato existente
-*   `DELETE /api/contacts/{id}` - Deleta um contato (Soft Delete)
-*   `POST /api/contacts/{id}/process-score` - Gatilho que envia a ordem de processamento de pontuação para a Fila.
+*   **Listar contatos (Paginado):** `GET /api/contacts`
+*   **Criar novo contato:** `POST /api/contacts`
+*   **Visualizar contato específico:** `GET /api/contacts/{id}`
+*   **Atualizar contato:** `PUT /api/contacts/{id}`
+*   **Remover contato (Soft Delete):** `DELETE /api/contacts/{id}`
+*   **Processar pontuação (Fila):** `POST /api/contacts/{id}/process-score` (Envia a ordem de pontuação para processamento assíncrono).
